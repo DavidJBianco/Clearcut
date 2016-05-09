@@ -28,17 +28,21 @@ if __name__ == "__main__":
 
     (opts, args) = parser.parse_args()
 
+    print('Loading HTTP data')
     df = load_brofile(args[0], fields_to_use)
 
-
+    print('Loading trained model')
     #read the vectorizers and trained RF file
     clf = joblib.load(opts.randomforestfile)
     vectorizers = joblib.load(opts.vectorizerfile)
 
+    print('Calculating features')
     featureMatrix = featureize(enhance_flow(df), vectorizers)
     featureMatrix['prediction'] = clf.predict(featureMatrix)
     featuresWithoutPredictions = featureMatrix.drop('prediction',axis=1)
 
+    print
+    print('Analyzing')
     outliers = featureMatrix[featureMatrix.prediction == 1].drop('prediction',axis=1)
     print 'Number of outliers detected: ' , len(df.index)
     if (opts.verbose):
