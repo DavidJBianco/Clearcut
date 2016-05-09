@@ -10,7 +10,7 @@ from optparse import OptionParser
 
 from featureizer import featureize
 from flowenhancer import enhance_flow
-from bsides_utils import load_brofile
+from clearcut_utils import load_brofile
 from train_flows_rf import fields_to_use
 import logging
 logging.basicConfig()

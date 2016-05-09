@@ -8,7 +8,7 @@ from optparse import OptionParser
 
 from featureizer import build_vectorizers,featureize
 from flowenhancer import enhance_flow
-from bsides_utils import load_brofile, create_noise_contrast
+from clearcut_utils import load_brofile, create_noise_contrast
 import logging
 logging.basicConfig()
 
