@@ -25,9 +25,9 @@ fields_to_use=['uid','resp_p',
 if __name__ == "__main__":
 
     __version__ = '1.0'
-    usage = """train_flows [options] classzerofile"""
+    usage = """train_flows [options] normaldatafile"""
     parser = OptionParser(usage=usage, version=__version__)
-    parser.add_option("-o", "--classonefile", action="store", type="string", \
+    parser.add_option("-o", "--maliciousdatafile", action="store", type="string", \
                       default=None, help="")
     parser.add_option("-f", "--randomforestfile", action="store", type="string", \
                       default='/tmp/rf.pkl', help="")
@@ -48,36 +48,38 @@ if __name__ == "__main__":
 
     (opts, args) = parser.parse_args()
 
+    print('Reading normal training data')
     df = load_brofile(args[0], fields_to_use)
-    print('Read 0-class data with %s rows ' % len(df.index))
+    print('Read normal data with %s rows ' % len(df.index))
 
     numSamples = len(df.index)
 
     if (numSamples > opts.maxtrainingfeatures):
-        print('Too many class 0 samples for training, downsampling to %d' % opts.maxtrainingfeatures)
+        print('Too many normal samples for training, downsampling to %d' % opts.maxtrainingfeatures)
         df = df.sample(n=opts.maxtrainingfeatures)
         numSamples = len(df.index)
 
-    if opts.classonefile != None:
-        df1 = load_brofile(opts.classonefile, fields_to_use)
-        print('Read 1-class data with %s rows ' % len(df1.index))
+    if opts.maliciousdatafile != None:
+        print('Reading malicious training data')
+        df1 = load_brofile(opts.maliciousdatafile, fields_to_use)
+        print('Read malicious data with %s rows ' % len(df1.index))
         if (len(df1.index) > opts.maxtrainingfeatures):
-            print('Too class 1 many samples for training, downsampling to %d' % opts.maxtrainingfeatures)
-        df1 = df1.sample(n=opts.maxtrainingfeatures)
+            print('Too many malicious samples for training, downsampling to %d' % opts.maxtrainingfeatures)
+            df1 = df1.sample(n=opts.maxtrainingfeatures)
 
         df['class'] = 0
         df1['class'] = 1
         classedDf = pd.concat([df,df1], ignore_index=True)
     else:
         noiseDf = create_noise_contrast(df, numSamples)
-        print('Added %s rows of generated 1-class data'%numSamples)
+        print('Added %s rows of generated malicious data'%numSamples)
         df['class'] = 0
         noiseDf['class'] = 1
         classedDf = pd.concat([df,noiseDf], ignore_index=True)
 
     enhancedDf = enhance_flow(classedDf)
 
-    print('Concatenated 0-class and 1-class total of %s rows' % len(enhancedDf.index))
+    print('Concatenated normal and malicious data, total of %s rows' % len(enhancedDf.index))
 
     vectorizers = build_vectorizers(enhancedDf, max_features=opts.maxfeaturesperbag, ngram_size=opts.ngramsize)
 
