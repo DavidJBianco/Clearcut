@@ -62,7 +62,7 @@ if __name__ == "__main__":
         print('Read 1-class data with %s rows ' % len(df1.index))
         if (len(df1.index) > opts.maxtrainingfeatures):
             print('Too class 1 many samples for training, downsampling to %d' % opts.maxtrainingfeatures)
-        df1 = df1.sample(n=opts.maxtrainingfeatures)
+            df1 = df1.sample(n=opts.maxtrainingfeatures)
 
         df['class'] = 0
         df1['class'] = 1
