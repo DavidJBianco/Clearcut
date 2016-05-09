@@ -114,7 +114,7 @@ if __name__ == "__main__":
             print("%d. feature %s (%f)" % (f + 1, testnoclass.columns.values[indices[f]], importances[indices[f]]))
 
 
-    print('\nPredicting (class 0 is normal, class 1 is malicious')
+    print('\nPredicting (class 0 is normal, class 1 is malicious)')
 
     test.is_copy = False
     test['prediction'] = clf.predict(testnoclass)
