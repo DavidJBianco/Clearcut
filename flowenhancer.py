@@ -1,4 +1,4 @@
-
+#!/usr/bin/env python
 import httpagentparser
 import tldextract
 from urlparse import urlparse, parse_qs

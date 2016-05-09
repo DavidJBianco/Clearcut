@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import pandas as pd
 import math, string, sys
 from pandas import DataFrame
