@@ -31,6 +31,9 @@ if __name__ == "__main__":
     print('Loading HTTP data')
     df = load_brofile(args[0], fields_to_use)
 
+    total_rows = len(df.index) 
+    print('Total number of rows: %d' % total_rows)
+
     print('Loading trained model')
     #read the vectorizers and trained RF file
     clf = joblib.load(opts.randomforestfile)
@@ -44,7 +47,10 @@ if __name__ == "__main__":
     print
     print('Analyzing')
     outliers = featureMatrix[featureMatrix.prediction == 1].drop('prediction',axis=1)
-    print 'Number of outliers detected: ' , len(df.index)
+
+    num_outliers = len(outliers.index) 
+    print 'Number of outliers detected: %d (%.2f%% reduction)' % (num_outliers, (1.0 - (num_outliers * 1.0 / total_rows))*100)
+    
     if (opts.verbose):
         print 'investigating all the outliers'
         prediction, bias, contributions = ti.predict(clf, outliers)
