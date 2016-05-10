@@ -31,8 +31,8 @@ if __name__ == "__main__":
     print('Loading HTTP data')
     df = load_brofile(args[0], fields_to_use)
 
-    total_rows = len(df.index) 
-    print('Total number of rows: %d' % total_rows)
+    total_rows = len(df.index)
+    if opts.verbose: print('Total number of rows: %d' % total_rows)
 
     print('Loading trained model')
     #read the vectorizers and trained RF file
@@ -40,7 +40,7 @@ if __name__ == "__main__":
     vectorizers = joblib.load(opts.vectorizerfile)
 
     print('Calculating features')
-    featureMatrix = featureize(enhance_flow(df), vectorizers)
+    featureMatrix = featureize(enhance_flow(df), vectorizers, verbose=opts.verbose)
     featureMatrix['prediction'] = clf.predict(featureMatrix)
     featuresWithoutPredictions = featureMatrix.drop('prediction',axis=1)
 
@@ -48,7 +48,7 @@ if __name__ == "__main__":
     print('Analyzing')
     outliers = featureMatrix[featureMatrix.prediction == 1].drop('prediction',axis=1)
 
-    num_outliers = len(outliers.index) 
+    num_outliers = len(outliers.index)
     print 'Number of outliers detected: %d (%.2f%% reduction)' % (num_outliers, (1.0 - (num_outliers * 1.0 / total_rows))*100)
     
     if (opts.verbose):

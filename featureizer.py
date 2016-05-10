@@ -7,32 +7,32 @@ from urlparse import urlparse, parse_qs
 import logging
 logging.basicConfig()
 
-def build_vectorizers(df, max_features=100, ngram_size=7):
+def build_vectorizers(df, max_features=100, ngram_size=7, verbose=False):
     print('\nBuilding Vectorizers')
     vectorizers = {}
     for feature in ['user_agent','uri','referrer','host', 'subdomain']:
-        print('Creating BON Vectorizer for %s' % feature)
+        if verbose: print('Creating BON Vectorizer for %s' % feature)
         vectorizer = TfidfVectorizer(analyzer='char',max_features = max_features,ngram_range=(ngram_size,ngram_size))
         vectorizers[feature] = vectorizer.fit(df[feature].astype(str))
     #get all the words BOW features in there
 
     for feature in ['method','status_code','resp_p_str', 'URIparams', 'browser_string', 'tld']:
-        print('Creating BOW Vectorizer for %s' % feature)
+        if verbose: print('Creating BOW Vectorizer for %s' % feature)
         vectorizer = TfidfVectorizer(analyzer='word',max_features = max_features)
         vectorizers[feature] = vectorizer.fit(df[feature].astype(str))
 
     return vectorizers
 
-def featureize(df, vectorizers):
-    print('\nExtracting features')
+def featureize(df, vectorizers, verbose=False):
+    if verbose: print('\nExtracting features')
     
     bow_features = []
     #get all the ngram BONgram features in there
     
     for feature in ['user_agent','uri','referrer','host', 'subdomain', 'method','status_code','resp_p_str', 'URIparams', 'browser_string', 'tld']:
-        print('Featurizing %s' % feature)
+        if verbose: print('Featurizing %s' % feature)
         single_feature_matrix = vectorizers[feature].transform(df[feature].astype(str))
-        print('  Dim of %s: %s' % (feature,single_feature_matrix.shape[1]))
+        if verbose: print('  Dim of %s: %s' % (feature,single_feature_matrix.shape[1]))
         single_df = DataFrame(single_feature_matrix.toarray())
         single_df.rename(columns=lambda x: feature+"."+vectorizers[feature].get_feature_names()[x], inplace=True)
         bow_features.append(single_df)
@@ -58,8 +58,8 @@ def featureize(df, vectorizers):
     featureMatrix['numURIParams'] = df['uri'].apply(countParams)
     featureMatrix['URIParamsKeyEntropy'] = df['URIparams'].apply(H)
     featureMatrix['URIParamsTokensEntropy'] = df['URItokens'].apply(H)
-    
-    print('Feature matrix generated with %s columns' % featureMatrix.shape[1])
+
+    if verbose: print('Feature matrix generated with %s columns' % featureMatrix.shape[1])
 
     return featureMatrix
 

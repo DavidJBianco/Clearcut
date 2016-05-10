@@ -50,21 +50,21 @@ if __name__ == "__main__":
 
     print('Reading normal training data')
     df = load_brofile(args[0], fields_to_use)
-    print('Read normal data with %s rows ' % len(df.index))
+    if opts.verbose: print('Read normal data with %s rows ' % len(df.index))
 
     numSamples = len(df.index)
 
     if (numSamples > opts.maxtrainingfeatures):
-        print('Too many normal samples for training, downsampling to %d' % opts.maxtrainingfeatures)
+        if opts.verbose: print('Too many normal samples for training, downsampling to %d' % opts.maxtrainingfeatures)
         df = df.sample(n=opts.maxtrainingfeatures)
         numSamples = len(df.index)
 
     if opts.maliciousdatafile != None:
         print('Reading malicious training data')
         df1 = load_brofile(opts.maliciousdatafile, fields_to_use)
-        print('Read malicious data with %s rows ' % len(df1.index))
+        if opts.verbose: print('Read malicious data with %s rows ' % len(df1.index))
         if (len(df1.index) > opts.maxtrainingfeatures):
-            print('Too many malicious samples for training, downsampling to %d' % opts.maxtrainingfeatures)
+            if opts.verbose: print('Too many malicious samples for training, downsampling to %d' % opts.maxtrainingfeatures)
             df1 = df1.sample(n=opts.maxtrainingfeatures)
 
         df['class'] = 0
@@ -72,18 +72,18 @@ if __name__ == "__main__":
         classedDf = pd.concat([df,df1], ignore_index=True)
     else:
         noiseDf = create_noise_contrast(df, numSamples)
-        print('Added %s rows of generated malicious data'%numSamples)
+        if opts.verbose: print('Added %s rows of generated malicious data'%numSamples)
         df['class'] = 0
         noiseDf['class'] = 1
         classedDf = pd.concat([df,noiseDf], ignore_index=True)
 
     enhancedDf = enhance_flow(classedDf)
 
-    print('Concatenated normal and malicious data, total of %s rows' % len(enhancedDf.index))
+    if opts.verbose: print('Concatenated normal and malicious data, total of %s rows' % len(enhancedDf.index))
 
-    vectorizers = build_vectorizers(enhancedDf, max_features=opts.maxfeaturesperbag, ngram_size=opts.ngramsize)
+    vectorizers = build_vectorizers(enhancedDf, max_features=opts.maxfeaturesperbag, ngram_size=opts.ngramsize, verbose=opts.verbose)
 
-    featureMatrix = featureize(enhancedDf, vectorizers)
+    featureMatrix = featureize(enhancedDf, vectorizers, verbose=opts.verbose)
 
     featureMatrix['class'] = enhancedDf['class']
 
@@ -101,17 +101,19 @@ if __name__ == "__main__":
     clf.fit(train.drop('class', axis=1), y)
     testnoclass = test.drop('class', axis=1)
 
-    print("\nFeature ranking:")
 
-    importances = clf.feature_importances_
-    std = np.std([tree.feature_importances_ for tree in clf.estimators_],
-                 axis=0)
-    indices = np.argsort(importances)[::-1]
+    if opts.verbose:
+        print("\nFeature ranking:")
 
-    # Print the feature ranking
-    for f in range(testnoclass.shape[1]):
-        if (importances[indices[f]] > 0.005):
-            print("%d. feature %s (%f)" % (f + 1, testnoclass.columns.values[indices[f]], importances[indices[f]]))
+        importances = clf.feature_importances_
+        std = np.std([tree.feature_importances_ for tree in clf.estimators_],
+                     axis=0)
+        indices = np.argsort(importances)[::-1]
+
+        # Print the feature ranking
+        for f in range(testnoclass.shape[1]):
+            if (importances[indices[f]] > 0.005):
+                print("%d. feature %s (%f)" % (f + 1, testnoclass.columns.values[indices[f]], importances[indices[f]]))
 
 
     print('\nPredicting (class 0 is normal, class 1 is malicious)')
