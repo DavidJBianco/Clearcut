@@ -52,7 +52,7 @@ if __name__ == "__main__":
     outliers = featureMatrix[featureMatrix.prediction == 1].drop('prediction',axis=1)
 
     num_outliers = len(outliers.index)
-    print 'Number of outliers detected: %d (%.2f%% reduction)' % (num_outliers, (1.0 - (num_outliers * 1.0 / total_rows))*100)
+    print 'detected %d anomalies out of %d total rows (%.2f%%)' % (num_outliers, total_rows, (num_outliers * 1.0 / total_rows)*100)
     
     if (opts.verbose):
         print 'investigating all the outliers'
