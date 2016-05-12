@@ -28,6 +28,9 @@ if __name__ == "__main__":
 
     (opts, args) = parser.parse_args()
 
+    if len(args)!=1:
+        parser.error('Incorrect number of arguments')
+
     print('Loading HTTP data')
     df = load_brofile(args[0], fields_to_use)
 

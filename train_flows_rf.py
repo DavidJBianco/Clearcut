@@ -28,25 +28,28 @@ if __name__ == "__main__":
     usage = """train_flows [options] normaldatafile"""
     parser = OptionParser(usage=usage, version=__version__)
     parser.add_option("-o", "--maliciousdatafile", action="store", type="string", \
-                      default=None, help="")
+                      default=None, help="An optional file of malicious http logs")
     parser.add_option("-f", "--randomforestfile", action="store", type="string", \
-                      default='/tmp/rf.pkl', help="")
+                      default='/tmp/rf.pkl', help="the location to store the forest classifier")
     parser.add_option("-x", "--vectorizerfile", action="store", type="string", \
-                      default='/tmp/vectorizers.pkl', help="")
+                      default='/tmp/vectorizers.pkl', help="the location to store the vectorizer")
 
     parser.add_option("-m", "--maxfeaturesperbag", action="store", type="int", \
-                          default=100, help="")
+                          default=100, help="maximum number of features per bag")
     parser.add_option("-g", "--ngramsize", action="store", type="int", \
-                      default=7, help="")
+                      default=7, help="ngram size")
 
     parser.add_option("-t", "--maxtrainingfeatures", action="store", type="int", \
-                      default=50000, help="")
+                      default=50000, help="maximum number of rows to train with per class")
     parser.add_option("-n", "--numtrees", action="store", type="int", \
-                      default=50, help="")
+                      default=50, help="number of trees in random forest")
     parser.add_option("-v", "--verbose", action="store_true", default=False, \
                       help="enable verbose output")
 
     (opts, args) = parser.parse_args()
+
+    if len(args)!=1:
+        parser.error('Incorrect number of arguments')
 
     print('Reading normal training data')
     df = load_brofile(args[0], fields_to_use)

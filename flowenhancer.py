@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 import httpagentparser
 import tldextract
+import logging
 from urlparse import urlparse, parse_qs
 
 
+logging.getLogger("tldextract").setLevel(logging.CRITICAL)
 def enhance_flow(flowDF):
     #create some useful pre-features
     flowDF['resp_p_str'] = flowDF['resp_p'].apply(str)
