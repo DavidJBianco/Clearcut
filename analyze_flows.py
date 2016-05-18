@@ -1,9 +1,5 @@
 #!/usr/bin/env python
 import pandas as pd
-import numpy as np
-import sys
-import cPickle
-from sklearn.ensemble import RandomForestClassifier
 from sklearn.externals import joblib
 from treeinterpreter import treeinterpreter as ti
 from optparse import OptionParser
@@ -31,6 +27,7 @@ if __name__ == "__main__":
     if len(args)!=1:
         parser.error('Incorrect number of arguments')
 
+    #load the http data in to a data frame
     print('Loading HTTP data')
     df = load_brofile(args[0], fields_to_use)
 
@@ -43,12 +40,15 @@ if __name__ == "__main__":
     vectorizers = joblib.load(opts.vectorizerfile)
 
     print('Calculating features')
+    #get a numberic feature dataframe using our flow enhancer and featurizer
     featureMatrix = featureize(enhance_flow(df), vectorizers, verbose=opts.verbose)
+
+    #predict the class of each row using the random forest
     featureMatrix['prediction'] = clf.predict(featureMatrix)
-    featuresWithoutPredictions = featureMatrix.drop('prediction',axis=1)
 
     print
     print('Analyzing')
+    #get the class-1 (outlier/anomaly) rows from the feature matrix, and drop the prediction so we can investigate them
     outliers = featureMatrix[featureMatrix.prediction == 1].drop('prediction',axis=1)
 
     num_outliers = len(outliers.index)
@@ -56,16 +56,20 @@ if __name__ == "__main__":
     
     if (opts.verbose):
         print 'investigating all the outliers'
+        #investigate each outlier (determine the most influential columns in the prediction)
         prediction, bias, contributions = ti.predict(clf, outliers)
         print 'done'
         print(contributions.shape)
 
     i=0
+    #for each anomaly
     for index, row in outliers.iterrows():
         print('-----------------------------------------')
         print 'line ',index
+        #find the row in the original data of the anomaly. print it out as CSV.
         print pd.DataFrame(df.iloc[index]).T.to_csv(header=False, index=False)
         if (opts.verbose):
+            #if we are verbose print out the investigation by zipping the heavily weighted columns with the appropriate features
             instancecontributions = zip(contributions[i], outliers.columns.values)
             print "Top feature contributions to class 1:"
             for (c, feature) in sorted(instancecontributions, key=lambda (c,f): c[1], reverse=True)[:10]:

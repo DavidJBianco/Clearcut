@@ -44,9 +44,30 @@ def load_brofile(filename, fields_to_use):
     return df[fields_to_use]
 
 def create_noise_contrast(df, num_samples):
+    """
+      Create a noise contrasted dataframe from a dataframe. We do this
+      by sampling columns with replacement one at a time from the original
+      data, and then stitching those columns together into de-correlated rows.
+
+      Parameters
+      ----------
+      df : dataframe
+          The enhanced HTTP log dataframe
+      num_samples : int
+            Number of new rows to create
+
+      Returns
+      -------
+      newDf : dataframe
+
+    """
+
     newDf = None
     for field in list(df):
+        #sample the column with replacement.
         df1 = df[[field]].sample(n=num_samples, replace=True).reset_index(drop=True)
+
+        #add the new column to the answer (or start a new df if this is the first column)
         if (newDf is not None):
             newDf = pd.concat([newDf, df1], axis = 1)
         else:
