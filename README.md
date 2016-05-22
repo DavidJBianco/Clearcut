@@ -8,5 +8,5 @@ Clearcut is a tool that uses machine learning to help you focus on the log entri
 
 
 ## More Info
-See our BSidesBoston 2016 presentation, ["Getting Started with Machine Learning for Incident Detection"](https://goo.gl/UYfPau).  
+See our BSidesBoston 2016 presentation, ["Getting Started with Machine Learning for Incident Detection"](https://speakerdeck.com/davidjbianco/getting-started-with-machine-learning-for-incident-detection).  
 
