@@ -130,7 +130,7 @@ if __name__ == "__main__":
     clf = IsolationForest(n_estimators=opts.numtrees)
 
 
-    #train the random forest on the training set, dropping the class column (since the trainer takes that as a separate argument)
+    #train the isolation forest on the training set, dropping the class column (since the trainer takes that as a separate argument)
     print('\nTraining')
     clf.fit(train.drop('class', axis=1))
 
