@@ -9,7 +9,7 @@ import logging
 logging.basicConfig()
 
 
-def build_vectorizers(df, max_features=100, ngram_size=7, verbose=False):
+def build_vectorizers(df, max_features=100, ngram_size=7, verbose=False, ngram_features=['user_agent','uri','referrer','host', 'subdomain'], bow_features=['method','status_code','resp_p_str', 'URIparams', 'browser_string', 'tld']):
     """
       Build some vectorizers based on an enhanced http dataframe
 
@@ -33,13 +33,13 @@ def build_vectorizers(df, max_features=100, ngram_size=7, verbose=False):
     print('\nBuilding Vectorizers')
     vectorizers = {}
     #create bag of ngram vectorizers
-    for feature in ['user_agent','uri','referrer','host', 'subdomain']:
+    for feature in ngram_features:
         if verbose: print('Creating BON Vectorizer for %s' % feature)
         vectorizer = TfidfVectorizer(analyzer='char',max_features = max_features,ngram_range=(ngram_size,ngram_size))
         vectorizers[feature] = vectorizer.fit(df[feature].astype(str))
 
     #create bag of words vectorizers
-    for feature in ['method','status_code','resp_p_str', 'URIparams', 'browser_string', 'tld']:
+    for feature in bow_features:
         if verbose: print('Creating BOW Vectorizer for %s' % feature)
         vectorizer = TfidfVectorizer(analyzer='word',max_features = max_features)
         vectorizers[feature] = vectorizer.fit(df[feature].astype(str))
@@ -72,11 +72,14 @@ def featureize(df, vectorizers, verbose=False):
     
     for feature in ['user_agent','uri','referrer','host', 'subdomain', 'method','status_code','resp_p_str', 'URIparams', 'browser_string', 'tld']:
         if verbose: print('Featurizing %s' % feature)
-        single_feature_matrix = vectorizers[feature].transform(df[feature].astype(str))
-        if verbose: print('  Dim of %s: %s' % (feature,single_feature_matrix.shape[1]))
-        single_df = DataFrame(single_feature_matrix.toarray())
-        single_df.rename(columns=lambda x: feature+"."+vectorizers[feature].get_feature_names()[x], inplace=True)
-        bow_features.append(single_df)
+        if feature in vectorizers:
+            single_feature_matrix = vectorizers[feature].transform(df[feature].astype(str))
+            if verbose: print('  Dim of %s: %s' % (feature,single_feature_matrix.shape[1]))
+            single_df = DataFrame(single_feature_matrix.toarray())
+            single_df.rename(columns=lambda x: feature+"."+vectorizers[feature].get_feature_names()[x], inplace=True)
+            bow_features.append(single_df)
+        else:
+            print('Vectorizer for feature %s not found, skipping' % feature)
 
     featureMatrix = pd.concat(bow_features, axis=1)
     
