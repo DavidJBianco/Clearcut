@@ -41,7 +41,7 @@ if __name__ == "__main__":
     parser.add_option("-t", "--maxtrainingfeatures", action="store", type="int", \
                       default=1000000, help="maximum number of rows to train with per class")
     parser.add_option("-n", "--numtrees", action="store", type="int", \
-                      default=50, help="number of trees in random forest")
+                      default=50, help="number of trees in the forest")
 
     parser.add_option("-p", "--maxoutlierpct", action="store", type="float", default=0.1, \
                       help="max % allowed outliers")
@@ -144,7 +144,7 @@ if __name__ == "__main__":
     test['prediction'] = clf.predict(testnoclass)
     print
 
-    #group by class (the real answers) and prediction (what the RF said). we want these values to match for 'good' answers
+    #group by class (the real answers) and prediction (what the forest said). we want these values to match for 'good' answers
     results=test.groupby(['class', 'prediction'])
     resultsagg = results.size()
     print(resultsagg)
