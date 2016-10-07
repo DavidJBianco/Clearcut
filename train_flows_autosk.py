@@ -11,6 +11,8 @@ from clearcut_utils import load_brofile, create_noise_contrast
 import logging
 import os
 
+import autosklearn.classification
+
 logging.basicConfig()
 
 fields_to_use=['uid','resp_p',
@@ -61,6 +63,7 @@ if __name__ == "__main__":
         df= pd.concat(dfs, ignore_index=True)
     else:
         df = load_brofile(args[0], fields_to_use)
+
     if opts.verbose: print('Read normal data with %s rows ' % len(df.index))
 
     numSamples = len(df.index)
@@ -116,37 +119,23 @@ if __name__ == "__main__":
     test = test.drop('is_train', axis=1)
 
     #create the random forest class and factorize the class column
-    clf = RandomForestClassifier(n_jobs=4, n_estimators=opts.numtrees, oob_score=True)
+    #clf = RandomForestClassifier(n_jobs=4, n_estimators=opts.numtrees, oob_score=True)
+    clf = autosklearn.classification.AutoSklearnClassifier(time_left_for_this_task = 600, per_run_time_limit=60)
     y, _ = pd.factorize(train['class'])
 
     #train the random forest on the training set, dropping the class column (since the trainer takes that as a separate argument)
     print('\nTraining')
-    clf.fit(train.drop('class', axis=1), y)
+    clf.fit(train.drop('class', axis=1).as_matrix(), train['class'].as_matrix())
 
     #remove the 'answers' from the test set
     testnoclass = test.drop('class', axis=1)
-
-
-    #rank the features using some magic
-    if opts.verbose:
-        print("\nFeature ranking:")
-
-        importances = clf.feature_importances_
-        std = np.std([tree.feature_importances_ for tree in clf.estimators_],
-                     axis=0)
-        indices = np.argsort(importances)[::-1]
-
-        # Print the feature ranking
-        for f in range(testnoclass.shape[1]):
-            if (importances[indices[f]] > 0.005):
-                print("%d. feature %s (%f)" % (f + 1, testnoclass.columns.values[indices[f]], importances[indices[f]]))
 
 
     print('\nPredicting (class 0 is normal, class 1 is malicious)')
 
     #evaluate our results on the test set.
     test.is_copy = False
-    test['prediction'] = clf.predict(testnoclass)
+    test['prediction'] = clf.predict(testnoclass.as_matrix())
     print
 
     #group by class (the real answers) and prediction (what the RF said). we want these values to match for 'good' answers
@@ -162,4 +151,5 @@ if __name__ == "__main__":
 
     #save the vectorizers and trained RF file
     joblib.dump(vectorizers, opts.vectorizerfile)
-    joblib.dump(clf, opts.randomforestfile)
+    #autosk doesn't support this
+    #joblib.dump(clf, opts.randomforestfile)
