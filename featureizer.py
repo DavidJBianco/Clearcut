@@ -79,7 +79,8 @@ def featureize(df, vectorizers, verbose=False):
             single_df.rename(columns=lambda x: feature+"."+vectorizers[feature].get_feature_names()[x], inplace=True)
             bow_features.append(single_df)
         else:
-            print('Vectorizer for feature %s not found, skipping' % feature)
+            if verbose:
+                print('INFO: Skipping featurization of %s (no vectorizer exists)' % feature)
 
     featureMatrix = pd.concat(bow_features, axis=1)
     
