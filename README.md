@@ -5,7 +5,7 @@ Clearcut is a tool that uses machine learning to help you focus on the log entri
 
 You need a few libraries installed for this to work.
 
-    % sudo pip install git+https://github.com/scikit-learn/scikit-learn.git#egg=scikit-learn
+    % sudo pip install scikit-learn
     % pip install sklearn-extensions pandas httpagentparser tldextract treeinterpreter
 
 
