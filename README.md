@@ -19,5 +19,5 @@ You need a few libraries installed for this to work.
 
 
 ## More Info
-See our BSidesBoston 2016 presentation, ["Getting Started with Machine Learning for Incident Detection"](https://speakerdeck.com/davidjbianco/getting-started-with-machine-learning-for-incident-detection).  
+See our BSidesDC 2016 presentation, ["Practical Cyborgism: Getting Started with Machine Learning for Incident Detection"](https://speakerdeck.com/davidjbianco/practical-cyborgism-getting-started-with-machine-learning-for-incident-detection).  
 
